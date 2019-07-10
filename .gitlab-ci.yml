@@ -1,0 +1,67 @@
+image: docker.westwing.eu/westwing/docker-k8s:1.4.6
+
+stages:
+  - build
+  - prepare_manifests
+  - deploy
+
+variables:
+  DOCKER_IMAGE_TAG: latest # For real live use $CI_PIPELINE_ID
+
+docker:build:
+  stage: build
+  script: 
+    - echo "Docker build"
+    # - docker build -t $DOCKER_IMAGE:$DOCKER_IMAGE_TAG . -f _docker/Dockerfile
+    # - docker push $DOCKER_IMAGE
+  tags:
+    - shell
+
+# Gitlab CI kubernetes integration
+prepare_manifests:kubectl:
+  stage: prepare_manifests
+  environment:
+    name: test
+  artifacts:
+    paths:
+    - artifacts/kubectl
+    expire_in: 1 week
+  script:
+    - mkdir -p ./artifacts/kubectl
+    - envsubst < "./_k8s/2-gitlabci/app.yaml" > "./artifacts/kubectl/app.yaml"
+  tags:
+    - dind
+
+deploy:kubectl:
+  stage: deploy
+  environment:
+    name: test
+  script:
+    - kubectl apply -f ./artifacts/kubectl/app.yaml
+  tags:
+    - dind
+
+# Spinnaker
+prepare_manifests:spinnaker:
+  stage: prepare_manifests
+  environment:
+    name: test
+  artifacts:
+    paths:
+    - artifacts/spinnaker
+    expire_in: 1 week
+  script:
+    - mkdir -p ./artifacts/spinnaker
+    - envsubst < "./_k8s/3-deploy-spinnaker/app.yaml" > "./artifacts/spinnaker/app.yaml"
+  tags:
+    - dind
+
+deploy:spinnaker:
+  stage: deploy
+  environment:
+    name: test
+  script:
+    - aws s3 cp ./artifacts/spinnaker/app.yaml s3://${S3_BUCKET_NAME}/how-to-deploy-to-k8s/app.yaml --region eu-central-1
+    - _ci/spinnaker.sh
+  tags:
+    - dind

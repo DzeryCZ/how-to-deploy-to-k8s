@@ -1,0 +1,54 @@
+{
+    "expectedArtifacts": [
+      {
+        "defaultArtifact": {
+          "id": "e9e588ed-35c9-4566-878c-97a11a0d8af9",
+          "name": "<path-to-manifest-in-s3>",
+          "reference": "<path-to-manifest-in-s3>",
+          "type": "s3/object"
+        },
+        "id": "bb6e1d2a-a566-4bba-be21-c8ca50ce482c",
+        "matchArtifact": {
+          "id": "d1a7859c-45f6-4ca8-ba75-23ac225bf42a",
+          "name": "<path-to-manifest-in-s3>",
+          "type": "s3/object"
+        },
+        "useDefaultArtifact": true,
+        "usePriorArtifact": false
+      }
+    ],
+    "keepWaitingPipelines": false,
+    "lastModifiedBy": "anonymous",
+    "limitConcurrent": true,
+    "parameterConfig": [
+      {
+        "description": "version",
+        "label": "version",
+        "name": "version",
+        "required": false
+      }
+    ],
+    "stages": [
+      {
+        "account": "<name-of-your-cluster>",
+        "cloudProvider": "kubernetes",
+        "expectedArtifacts": [],
+        "manifestArtifactAccount": "helm-artifacts",
+        "manifestArtifactId": "bb6e1d2a-a566-4bba-be21-c8ca50ce482c",
+        "moniker": {
+          "app": "how-to-deploy-to-k8s"
+        },
+        "name": "Deploy",
+        "refId": "1",
+        "relationships": {
+          "loadBalancers": [],
+          "securityGroups": []
+        },
+        "requisiteStageRefIds": [],
+        "source": "artifact",
+        "type": "deployManifest"
+      }
+    ],
+    "triggers": [],
+    "updateTs": "1562697703000"
+  }

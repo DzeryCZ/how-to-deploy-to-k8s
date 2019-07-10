@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: $CI_ENVIRONMENT_SLUG
+  name: webserver
+  namespace: $KUBE_NAMESPACE
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: $CI_ENVIRONMENT_SLUG
+  template:
+    metadata:
+      labels:
+        app: $CI_ENVIRONMENT_SLUG
+    spec:
+      containers:
+      - image: $DOCKER_IMAGE:$DOCKER_IMAGE_TAG
+        name: hello
+        ports:
+        - name: http
+          containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        env:
+          - name: APP_HEALTHY
+            value: "$APP_HEALTHY"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: webserver
+  namespace: $KUBE_NAMESPACE
+spec:
+  selector:
+    app: $CI_ENVIRONMENT_SLUG
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
